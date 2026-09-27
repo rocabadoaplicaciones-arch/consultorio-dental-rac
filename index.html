@@ -1,1 +1,679 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAC DENTISTA & NEGOCIOS PRO | ROCABADO CONSULTORES</title>
+    <!-- Tailwind CSS para diseño moderno y elegante -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        navy: {
+                            800: '#0F172A',
+                            900: '#081F5C', // Azul Institucional Rocabado
+                        },
+                        gold: {
+                            500: '#D4AF37', // Dorado Ejecutivo
+                            600: '#AA8C2C',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome para Iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-100 font-sans text-gray-800 antialiased">
 
+    <!-- CONTENEDOR GENERAL -->
+    <div id="app" class="min-h-screen flex flex-col">
+
+        <!-- ================= PANTALLA 1: PANEL MAESTRO / CONFIGURACIÓN ================= -->
+        <div id="view-master" class="flex-1 flex flex-col justify-center items-center p-4 bg-gradient-to-br from-navy-950 via-navy-900 to-gray-900 text-white">
+            <div class="max-w-xl w-full bg-white text-gray-800 rounded-2xl shadow-2xl p-8 border-t-4 border-gold-500">
+                <div class="text-center mb-6">
+                    <h1 class="text-2xl font-bold text-navy-900"><i class="fa-solid fa-tooth text-gold-500 mr-2"></i> RAC DENTISTA & NEGOCIOS PRO</h1>
+                    <p class="text-sm text-gray-500 mt-1">Plataforma Multiempresa · Powered by Rocabado Consultores</p>
+                </div>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Nombre de la Empresa / Consultorio</label>
+                        <input type="text" id="master-empresa" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-navy-900 outline-none" value="Clínica Odontológica & Negocios Rocabado">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">NIT / ID Tributario</label>
+                            <input type="text" id="master-nit" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-navy-900 outline-none" value="1029384756">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Fondo Inicial Caja (Bs.)</label>
+                            <input type="number" id="master-fondo" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-navy-900 outline-none" value="20000">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Sucursales a Operar (Separadas por coma)</label>
+                        <input type="text" id="master-sucursales" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-navy-900 outline-none" value="Consultorio Villa, Consultorio Pampa, Restaurante Central">
+                    </div>
+                    
+                    <button onclick="iniciarSistemaMaster()" class="w-full py-3 bg-navy-900 hover:bg-navy-800 text-gold-500 font-bold rounded-lg shadow-lg transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-arrow-right-to-bracket"></i> Inicializar Sistema Operativo
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= PANTALLA 2: APLICACIÓN OPERATIVA PRINCIPAL ================= -->
+        <div id="view-app" class="hidden flex-1 flex flex-col">
+            
+            <!-- HEADER CORPORATIVO -->
+            <header class="bg-navy-900 text-white shadow-md">
+                <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="bg-gold-500 text-navy-900 p-2 rounded-lg font-black text-lg">
+                            <i class="fa-solid fa-chart-pie"></i>
+                        </div>
+                        <div>
+                            <h2 id="header-nombre-empresa" class="font-bold text-lg leading-tight">Empresa Configurada</h2>
+                            <p class="text-xs text-gold-400">Rocabado Consultores · Sistema Gerencial</p>
+                        </div>
+                    </div>
+
+                    <!-- SELECTOR DE SUCURSALES -->
+                    <div class="flex items-center gap-2">
+                        <label class="text-xs font-bold uppercase text-gold-400"><i class="fa-solid fa-code-branch"></i> Sucursal:</label>
+                        <select id="select-sucursal" onchange="cambiarSucursal(this.value)" class="bg-navy-800 text-white border border-gold-500/50 rounded px-3 py-1.5 text-sm font-semibold outline-none">
+                            <!-- Dinámico -->
+                        </select>
+                        <button onclick="volverMaster()" class="bg-red-600/80 hover:bg-red-700 text-white px-3 py-1.5 rounded text-xs font-bold transition">Salir</button>
+                    </div>
+                </div>
+
+                <!-- NAVEGACIÓN PRINCIPAL (PESTAÑAS) -->
+                <div class="bg-navy-950 px-4 border-t border-navy-800 overflow-x-auto">
+                    <div class="max-w-7xl mx-auto flex space-x-1 sm:space-x-4">
+                        <button onclick="cambiarTab('dash')" class="tab-btn px-4 py-3 text-xs sm:text-sm font-bold border-b-2 border-gold-500 text-gold-400 flex items-center gap-2 whitespace-nowrap"><i class="fa-solid fa-gauge-high"></i> Dashboard</button>
+                        <button onclick="cambiarTab('agenda')" class="tab-btn px-4 py-3 text-xs sm:text-sm font-bold border-b-2 border-transparent text-gray-300 hover:text-white flex items-center gap-2 whitespace-nowrap"><i class="fa-solid fa-calendar-days"></i> Agenda & WhatsApp</button>
+                        <button onclick="cambiarTab('pos')" class="tab-btn px-4 py-3 text-xs sm:text-sm font-bold border-b-2 border-transparent text-gray-300 hover:text-white flex items-center gap-2 whitespace-nowrap"><i class="fa-solid fa-cash-register"></i> POS & Ventas</button>
+                        <button onclick="cambiarTab('gastos')" class="tab-btn px-4 py-3 text-xs sm:text-sm font-bold border-b-2 border-transparent text-gray-300 hover:text-white flex items-center gap-2 whitespace-nowrap"><i class="fa-solid fa-file-invoice-dollar"></i> Gastos & Libro Mayor</button>
+                        <button onclick="cambiarTab('personal')" class="tab-btn px-4 py-3 text-xs sm:text-sm font-bold border-b-2 border-transparent text-gray-300 hover:text-white flex items-center gap-2 whitespace-nowrap"><i class="fa-solid fa-users-gear"></i> Personal & Comisiones</button>
+                        <button onclick="cambiarTab('personal-gastos')" class="tab-btn px-4 py-3 text-xs sm:text-sm font-bold border-b-2 border-transparent text-gray-300 hover:text-white flex items-center gap-2 whitespace-nowrap"><i class="fa-solid fa-wallet"></i> Gastos Personales</button>
+                        <button onclick="cambiarTab('reportes')" class="tab-btn px-4 py-3 text-xs sm:text-sm font-bold border-b-2 border-transparent text-gray-300 hover:text-white flex items-center gap-2 whitespace-nowrap"><i class="fa-solid fa-file-excel"></i> Reportes & Cxc</button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- CONTENIDO DE LAS PESTAÑAS -->
+            <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6">
+
+                <!-- 1. DASHBOARD -->
+                <div id="tab-dash" class="tab-content space-y-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="bg-white p-5 rounded-xl shadow border-l-4 border-green-600">
+                            <p class="text-xs font-bold text-gray-400 uppercase">Ingresos Totales Hoy</p>
+                            <h3 id="dash-ingresos" class="text-2xl font-black text-gray-800 mt-1">Bs. 0.00</h3>
+                            <div class="text-xs text-gray-500 mt-2 flex justify-between">
+                                <span>Efectivo: <strong id="dash-efectivo">Bs. 0</strong></span>
+                                <span>QR: <strong id="dash-qr">Bs. 0</strong></span>
+                            </div>
+                        </div>
+                        <div class="bg-white p-5 rounded-xl shadow border-l-4 border-red-500">
+                            <p class="text-xs font-bold text-gray-400 uppercase">Gastos Operativos</p>
+                            <h3 id="dash-gastos" class="text-2xl font-black text-gray-800 mt-1">Bs. 0.00</h3>
+                            <span class="text-xs text-red-500 font-semibold mt-2 block">Salidas registradas hoy</span>
+                        </div>
+                        <div class="bg-white p-5 rounded-xl shadow border-l-4 border-blue-600">
+                            <p class="text-xs font-bold text-gray-400 uppercase">Utilidad Neta Estimada</p>
+                            <h3 id="dash-utilidad" class="text-2xl font-black text-blue-900 mt-1">Bs. 0.00</h3>
+                            <span class="text-xs text-blue-500 font-semibold mt-2 block">Ingresos menos Egresos</span>
+                        </div>
+                        <div class="bg-white p-5 rounded-xl shadow border-l-4 border-gold-500">
+                            <p class="text-xs font-bold text-gray-400 uppercase">Comisiones por Pagar</p>
+                            <h3 id="dash-comisiones" class="text-2xl font-black text-gray-800 mt-1">Bs. 0.00</h3>
+                            <span class="text-xs text-amber-600 font-semibold mt-2 block">Acumulado al personal</span>
+                        </div>
+                    </div>
+
+                    <!-- RESUMEN MULTISUCURSAL -->
+                    <div class="bg-white rounded-xl shadow p-6">
+                        <h3 class="font-bold text-navy-900 text-lg mb-4"><i class="fa-solid fa-building-columns text-gold-500 mr-2"></i> Resumen Consolidado por Sucursal</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm">
+                                <thead class="bg-gray-100 text-gray-700 uppercase text-xs">
+                                    <tr>
+                                        <th class="p-3">Sucursal</th>
+                                        <th class="p-3">Ingresos Efectivo</th>
+                                        <th class="p-3">Ingresos QR</th>
+                                        <th class="p-3">Total Ingresos</th>
+                                        <th class="p-3">Gastos</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabla-consolidado-sucursales" class="divide-y">
+                                    <!-- Dinámico -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. AGENDA & WHATSAPP -->
+                <div id="tab-agenda" class="tab-content hidden space-y-6">
+                    <div class="bg-white rounded-xl shadow p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div>
+                            <h3 class="font-bold text-navy-900 text-lg mb-4"><i class="fa-solid fa-calendar-plus text-gold-500 mr-2"></i> Agendar Nueva Cita</h3>
+                            <form onsubmit="registrarCita(event)" class="space-y-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Nombre del Paciente / Cliente</label>
+                                    <input type="text" id="agenda-nombre" required class="w-full px-3 py-2 border rounded-lg text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Celular (WhatsApp)</label>
+                                    <input type="text" id="agenda-celular" placeholder="Ej. 59170000000" required class="w-full px-3 py-2 border rounded-lg text-sm">
+                                </div>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Fecha / Hora</label>
+                                        <input type="datetime-local" id="agenda-fecha" required class="w-full px-3 py-2 border rounded-lg text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Servicio / Motivo</label>
+                                        <input type="text" id="agenda-servicio" placeholder="Ej. Endodoncia / Almuerzo" required class="w-full px-3 py-2 border rounded-lg text-sm">
+                                    </div>
+                                </div>
+                                <button type="submit" class="w-full py-2.5 bg-navy-900 text-gold-500 font-bold rounded-lg text-sm shadow hover:bg-navy-800 transition">Guardar Cita</button>
+                            </form>
+                        </div>
+                        <div class="lg:col-span-2">
+                            <h3 class="font-bold text-navy-900 text-lg mb-4"><i class="fa-solid fa-list-check text-gold-500 mr-2"></i> Citas Programadas</h3>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-sm">
+                                    <thead class="bg-gray-100 text-gray-700 uppercase text-xs">
+                                        <tr>
+                                            <th class="p-3">Fecha/Hora</th>
+                                            <th class="p-3">Paciente</th>
+                                            <th class="p-3">Servicio</th>
+                                            <th class="p-3">Acción WhatsApp</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tabla-citas" class="divide-y">
+                                        <!-- Dinámico -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. POS & VENTAS -->
+                <div id="tab-pos" class="tab-content hidden space-y-6">
+                    <div class="bg-white rounded-xl shadow p-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div>
+                            <h3 class="font-bold text-navy-900 text-lg mb-4"><i class="fa-solid fa-cash-register text-gold-500 mr-2"></i> Registrar Venta / Atención</h3>
+                            <form onsubmit="registrarVenta(event)" class="space-y-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Cliente / Paciente</label>
+                                    <input type="text" id="pos-cliente" required class="w-full px-3 py-2 border rounded-lg text-sm">
+                                </div>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Servicio / Producto</label>
+                                        <select id="pos-servicio" class="w-full px-3 py-2 border rounded-lg text-sm bg-white">
+                                            <option value="Limpieza Dental|150">Limpieza Dental (Bs. 150)</option>
+                                            <option value="Endodoncia|500">Endodoncia (Bs. 500)</option>
+                                            <option value="Extracción|200">Extracción (Bs. 200)</option>
+                                            <option value="Almuerzo Ejecutivo|35">Almuerzo Ejecutivo (Bs. 35)</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Monto (Bs.)</label>
+                                        <input type="number" id="pos-monto" step="0.01" required class="w-full px-3 py-2 border rounded-lg text-sm" value="150">
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Operador / Doctor</label>
+                                        <input type="text" id="pos-operador" placeholder="Ej. Dr. Carlos Rocabado" required class="w-full px-3 py-2 border rounded-lg text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Forma de Pago</label>
+                                        <select id="pos-pago" class="w-full px-3 py-2 border rounded-lg text-sm bg-white">
+                                            <option value="Efectivo">Efectivo</option>
+                                            <option value="QR">QR / Transferencia</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <button type="submit" class="w-full py-2.5 bg-green-600 text-white font-bold rounded-lg text-sm shadow hover:bg-green-700 transition">Cobrar e Imprimir Recibo</button>
+                            </form>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-navy-900 text-lg mb-4"><i class="fa-solid fa-receipt text-gold-500 mr-2"></i> Últimas Transacciones en Sucursal</h3>
+                            <div class="overflow-x-auto max-h-96 overflow-y-auto">
+                                <table class="w-full text-left text-sm">
+                                    <thead class="bg-gray-100 text-gray-700 uppercase text-xs sticky top-0">
+                                        <tr>
+                                            <th class="p-2">Cliente</th>
+                                            <th class="p-2">Servicio</th>
+                                            <th class="p-2">Monto</th>
+                                            <th class="p-2">Pago</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tabla-ventas" class="divide-y">
+                                        <!-- Dinámico -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. GASTOS & LIBRO MAYOR -->
+                <div id="tab-gastos" class="tab-content hidden space-y-6">
+                    <div class="bg-white rounded-xl shadow p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div>
+                            <h3 class="font-bold text-navy-900 text-lg mb-4"><i class="fa-solid fa-file-invoice-dollar text-gold-500 mr-2"></i> Registrar Gasto (Libro Mayor)</h3>
+                            <form onsubmit="registrarGasto(event)" class="space-y-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Categoría Contable</label>
+                                    <select id="gasto-categoria" class="w-full px-3 py-2 border rounded-lg text-sm bg-white">
+                                        <option value="Gastos Médicos y Salud">Gastos Médicos y Salud</option>
+                                        <option value="Insumos y Mercadería">Insumos y Mercadería</option>
+                                        <option value="Sueldos y Comisiones">Sueldos y Comisiones</option>
+                                        <option value="Alquileres y Servicios Básicos">Alquileres y Servicios Básicos</option>
+                                        <option value="Vehículo y Gasolina">Vehículo y Gasolina</option>
+                                        <option value="Préstamos Bancarios">Préstamos Bancarios</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Concepto / Detalle</label>
+                                    <input type="text" id="gasto-concepto" placeholder="Ej. Compra de guantes y gasas" required class="w-full px-3 py-2 border rounded-lg text-sm">
+                                </div>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Monto (Bs.)</label>
+                                        <input type="number" id="gasto-monto" step="0.01" required class="w-full px-3 py-2 border rounded-lg text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Forma de Pago</label>
+                                        <select id="gasto-pago" class="w-full px-3 py-2 border rounded-lg text-sm bg-white">
+                                            <option value="Efectivo">Efectivo</option>
+                                            <option value="QR">QR / Transferencia</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <button type="submit" class="w-full py-2.5 bg-red-600 text-white font-bold rounded-lg text-sm shadow hover:bg-red-700 transition">Registrar Gasto</button>
+                            </form>
+                        </div>
+                        <div class="lg:col-span-2">
+                            <h3 class="font-bold text-navy-900 text-lg mb-4"><i class="fa-solid fa-book text-gold-500 mr-2"></i> Libro Mayor de Egresos</h3>
+                            <div class="overflow-x-auto max-h-96 overflow-y-auto">
+                                <table class="w-full text-left text-sm">
+                                    <thead class="bg-gray-100 text-gray-700 uppercase text-xs sticky top-0">
+                                        <tr>
+                                            <th class="p-2">Fecha</th>
+                                            <th class="p-2">Categoría</th>
+                                            <th class="p-2">Concepto</th>
+                                            <th class="p-2">Pago</th>
+                                            <th class="p-2">Monto</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tabla-libro-mayor" class="divide-y">
+                                        <!-- Dinámico -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. PERSONAL & COMISIONES -->
+                <div id="tab-personal" class="tab-content hidden space-y-6">
+                    <div class="bg-white rounded-xl shadow p-6">
+                        <h3 class="font-bold text-navy-900 text-lg mb-4"><i class="fa-solid fa-users-gear text-gold-500 mr-2"></i> Planilla de Comisiones del Personal</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm">
+                                <thead class="bg-gray-100 text-gray-700 uppercase text-xs">
+                                    <tr>
+                                        <th class="p-3">Operador / Doctor</th>
+                                        <th class="p-3">Servicios Atendidos</th>
+                                        <th class="p-3">Total Generado</th>
+                                        <th class="p-3">Comisión Neta (30%)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabla-comisiones" class="divide-y">
+                                    <!-- Dinámico -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6. GASTOS PERSONALES -->
+                <div id="tab-personal-gastos" class="tab-content hidden space-y-6">
+                    <div class="bg-white rounded-xl shadow p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div>
+                            <h3 class="font-bold text-navy-900 text-lg mb-4"><i class="fa-solid fa-wallet text-gold-500 mr-2"></i> Control de Gastos Personales</h3>
+                            <form onsubmit="registrarGastoPersonal(event)" class="space-y-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Motivo / Detalle Personal</label>
+                                    <input type="text" id="gp-concepto" placeholder="Ej. Retiro personal / Supermercado" required class="w-full px-3 py-2 border rounded-lg text-sm">
+                                </div>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Monto (Bs.)</label>
+                                        <input type="number" id="gp-monto" step="0.01" required class="w-full px-3 py-2 border rounded-lg text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Forma de Pago</label>
+                                        <select id="gp-pago" class="w-full px-3 py-2 border rounded-lg text-sm bg-white">
+                                            <option value="Efectivo">Efectivo</option>
+                                            <option value="QR">QR / Transferencia</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <button type="submit" class="w-full py-2.5 bg-amber-600 text-white font-bold rounded-lg text-sm shadow hover:bg-amber-700 transition">Registrar Gasto Personal</button>
+                            </form>
+                        </div>
+                        <div class="lg:col-span-2">
+                            <h3 class="font-bold text-navy-900 text-lg mb-4"><i class="fa-solid fa-list text-gold-500 mr-2"></i> Historial de Retiros y Gastos Personales</h3>
+                            <div class="overflow-x-auto max-h-96 overflow-y-auto">
+                                <table class="w-full text-left text-sm">
+                                    <thead class="bg-gray-100 text-gray-700 uppercase text-xs sticky top-0">
+                                        <tr>
+                                            <th class="p-2">Fecha</th>
+                                            <th class="p-2">Concepto</th>
+                                            <th class="p-2">Pago</th>
+                                            <th class="p-2">Monto</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tabla-gp" class="divide-y">
+                                        <!-- Dinámico -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 7. REPORTES & CXC -->
+                <div id="tab-reportes" class="tab-content hidden space-y-6">
+                    <div class="bg-white rounded-xl shadow p-6 space-y-4">
+                        <h3 class="font-bold text-navy-900 text-lg"><i class="fa-solid fa-file-excel text-gold-500 mr-2"></i> Reportes Financieros y Cuentas por Cobrar</h3>
+                        <p class="text-sm text-gray-600">Herramienta de auditoría para revisión de saldos, flujos y control contable multi-sucursal.</p>
+                        <div class="flex gap-4">
+                            <button onclick="alert('Generando reporte gerencial en formato ejecutivo para WhatsApp...')" class="px-4 py-2 bg-navy-900 text-gold-500 font-bold rounded-lg text-sm shadow">Enviar Resumen a WhatsApp</button>
+                            <button onclick="alert('Exportando Libro Mayor y auxiliares contables...')" class="px-4 py-2 bg-green-700 text-white font-bold rounded-lg text-sm shadow">Exportar Auditoría</button>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+
+    </div>
+
+    <!-- JAVASCRIPT DE CONTROL -->
+    <script>
+        let db = {
+            empresa: "",
+            nit: "",
+            fondoInicial: 0,
+            sucursales: [],
+            sucursalActual: "",
+            citas: [],
+            ventas: [],
+            gastos: [],
+            gastosPersonales: []
+        };
+
+        function iniciarSistemaMaster() {
+            db.empresa = document.getElementById('master-empresa').value;
+            db.nit = document.getElementById('master-nit').value;
+            db.fondoInicial = parseFloat(document.getElementById('master-fondo').value) || 0;
+            let sucsInput = document.getElementById('master-sucursales').value;
+            db.sucursales = sucsInput.split(',').map(s => s.trim()).filter(s => s.length > 0);
+
+            if(db.sucursales.length === 0) {
+                alert('Debe ingresar al menos una sucursal.');
+                return;
+            }
+
+            db.sucursalActual = db.sucursales[0];
+            
+            // Actualizar UI
+            document.getElementById('header-nombre-empresa').innerText = db.empresa;
+            
+            let select = document.getElementById('select-sucursal');
+            select.innerHTML = '';
+            db.sucursales.forEach(s => {
+                let opt = document.createElement('option');
+                opt.value = s;
+                opt.innerText = s;
+                select.appendChild(opt);
+            });
+
+            document.getElementById('view-master').classList.add('hidden');
+            document.getElementById('view-app').classList.remove('hidden');
+
+            actualizarTodo();
+        }
+
+        function volverMaster() {
+            document.getElementById('view-app').classList.add('hidden');
+            document.getElementById('view-master').classList.remove('hidden');
+        }
+
+        function cambiarSucursal(sucursal) {
+            db.sucursalActual = sucursal;
+            actualizarTodo();
+        }
+
+        function cambiarTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('border-gold-500', 'text-gold-400');
+                btn.classList.add('border-transparent', 'text-gray-300');
+            });
+            
+            document.getElementById('tab-' + tabId).classList.remove('hidden');
+            event.currentTarget.classList.add('border-gold-500', 'text-gold-400');
+            event.currentTarget.classList.remove('text-gray-300');
+        }
+
+        // ACCIONES DE DATOS
+        function registrarCita(e) {
+            e.preventDefault();
+            let cita = {
+                sucursal: db.sucursalActual,
+                nombre: document.getElementById('agenda-nombre').value,
+                celular: document.getElementById('agenda-celular').value,
+                fecha: document.getElementById('agenda-fecha').value,
+                servicio: document.getElementById('agenda-servicio').value
+            };
+            db.citas.push(cita);
+            e.target.reset();
+            renderCitas();
+            alert('Cita registrada con éxito.');
+        }
+
+        function renderCitas() {
+            let tbody = document.getElementById('tabla-citas');
+            tbody.innerHTML = '';
+            db.citas.filter(c => c.sucursal === db.sucursalActual).forEach(c => {
+                let msg = encodeURIComponent(`Hola ${c.nombre}, le escribimos de ${db.empresa} (${db.sucursalActual}) para confirmarle su cita de ${c.servicio} programada para el ${c.fecha}. ¡Le esperamos!`);
+                tbody.innerHTML += `
+                    <tr class="hover:bg-gray-50">
+                        <td class="p-3">${c.fecha}</td>
+                        <td class="p-3 font-semibold">${c.nombre}</td>
+                        <td class="p-3">${c.servicio}</td>
+                        <td class="p-3">
+                            <a href="https://wa.me/${c.celular}?text=${msg}" target="_blank" class="bg-green-600 text-white px-3 py-1 rounded text-xs font-bold inline-flex items-center gap-1">
+                                <i class="fa-brands fa-whatsapp"></i> Enviar WhatsApp
+                            </a>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function registrarVenta(e) {
+            e.preventDefault();
+            let venta = {
+                sucursal: db.sucursalActual,
+                cliente: document.getElementById('pos-cliente').value,
+                servicio: document.getElementById('pos-servicio').value.split('|')[0],
+                monto: parseFloat(document.getElementById('pos-monto').value),
+                operador: document.getElementById('pos-operador').value,
+                pago: document.getElementById('pos-pago').value
+            };
+            db.ventas.push(venta);
+            e.target.reset();
+            actualizarTodo();
+            alert('Venta cobrada con éxito.');
+        }
+
+        function registrarGasto(e) {
+            e.preventDefault();
+            let gasto = {
+                sucursal: db.sucursalActual,
+                fecha: new Date().toLocaleDateString(),
+                categoria: document.getElementById('gasto-categoria').value,
+                concepto: document.getElementById('gasto-concepto').value,
+                monto: parseFloat(document.getElementById('gasto-monto').value),
+                pago: document.getElementById('gasto-pago').value
+            };
+            db.gastos.push(gasto);
+            e.target.reset();
+            actualizarTodo();
+            alert('Gasto registrado en el Libro Mayor.');
+        }
+
+        function registrarGastoPersonal(e) {
+            e.preventDefault();
+            let gp = {
+                sucursal: db.sucursalActual,
+                fecha: new Date().toLocaleDateString(),
+                concepto: document.getElementById('gp-concepto').value,
+                monto: parseFloat(document.getElementById('gp-monto').value),
+                pago: document.getElementById('gp-pago').value
+            };
+            db.gastosPersonales.push(gp);
+            e.target.reset();
+            actualizarTodo();
+            alert('Gasto personal registrado.');
+        }
+
+        function actualizarTodo() {
+            renderCitas();
+            
+            // Ventas de la sucursal actual
+            let ventasSuc = db.ventas.filter(v => v.sucursal === db.sucursalActual);
+            let totalIngresos = ventasSuc.reduce((acc, v) => acc + v.monto, 0);
+            let totalEfectivo = ventasSuc.filter(v => v.pago === 'Efectivo').reduce((acc, v) => acc + v.monto, 0);
+            let totalQR = ventasSuc.filter(v => v.pago === 'QR').reduce((acc, v) => acc + v.monto, 0);
+
+            let gastosSuc = db.gastos.filter(g => g.sucursal === db.sucursalActual);
+            let totalGastos = gastosSuc.reduce((acc, g) => acc + g.monto, 0);
+
+            let comisionesTotal = totalIngresos * 0.30; // 30% estimado de comisión
+
+            document.getElementById('dash-ingresos').innerText = `Bs. ${totalIngresos.toFixed(2)}`;
+            document.getElementById('dash-efectivo').innerText = `Bs. ${totalEfectivo.toFixed(2)}`;
+            document.getElementById('dash-qr').innerText = `Bs. ${totalQR.toFixed(2)}`;
+            document.getElementById('dash-gastos').innerText = `Bs. ${totalGastos.toFixed(2)}`;
+            document.getElementById('dash-utilidad').innerText = `Bs. ${(totalIngresos - totalGastos).toFixed(2)}`;
+            document.getElementById('dash-comisiones').innerText = `Bs. ${comisionesTotal.toFixed(2)}`;
+
+            // Tabla Ventas
+            let tbodyV = document.getElementById('tabla-ventas');
+            tbodyV.innerHTML = '';
+            ventasSuc.forEach(v => {
+                tbodyV.innerHTML += `
+                    <tr class="hover:bg-gray-50">
+                        <td class="p-2">${v.cliente}</td>
+                        <td class="p-2">${v.servicio}</td>
+                        <td class="p-2 font-bold text-green-600">Bs. ${v.monto.toFixed(2)}</td>
+                        <td class="p-2"><span class="px-2 py-0.5 rounded text-xs bg-gray-100 font-semibold">${v.pago}</span></td>
+                    </tr>
+                `;
+            });
+
+            // Tabla Libro Mayor (Gastos)
+            let tbodyG = document.getElementById('tabla-libro-mayor');
+            tbodyG.innerHTML = '';
+            gastosSuc.forEach(g => {
+                tbodyG.innerHTML += `
+                    <tr class="hover:bg-gray-50">
+                        <td class="p-2">${g.fecha}</td>
+                        <td class="p-2 font-semibold text-gray-700">${g.categoria}</td>
+                        <td class="p-2">${g.concepto}</td>
+                        <td class="p-2"><span class="px-2 py-0.5 rounded text-xs bg-gray-100">${g.pago}</span></td>
+                        <td class="p-2 font-bold text-red-600">Bs. ${g.monto.toFixed(2)}</td>
+                    </tr>
+                `;
+            });
+
+            // Tabla Gastos Personales
+            let gpSuc = db.gastosPersonales.filter(gp => gp.sucursal === db.sucursalActual);
+            let tbodyGP = document.getElementById('tabla-gp');
+            tbodyGP.innerHTML = '';
+            gpSuc.forEach(gp => {
+                tbodyGP.innerHTML += `
+                    <tr class="hover:bg-gray-50">
+                        <td class="p-2">${gp.fecha}</td>
+                        <td class="p-2">${gp.concepto}</td>
+                        <td class="p-2">${gp.pago}</td>
+                        <td class="p-2 font-bold text-amber-600">Bs. ${gp.monto.toFixed(2)}</td>
+                    </tr>
+                `;
+            });
+
+            // Tabla Consolidado Sucursales
+            let tbodyCons = document.getElementById('tabla-consolidado-sucursales');
+            tbodyCons.innerHTML = '';
+            db.sucursales.forEach(s => {
+                let vS = db.ventas.filter(v => v.sucursal === s);
+                let gS = db.gastos.filter(g => g.sucursal === s);
+                let efec = vS.filter(v => v.pago === 'Efectivo').reduce((a,b)=>a+b.monto,0);
+                let qr = vS.filter(v => v.pago === 'QR').reduce((a,b)=>a+b.monto,0);
+                let tot = efec + qr;
+                let gas = gS.reduce((a,b)=>a+b.monto,0);
+                tbodyCons.innerHTML += `
+                    <tr class="hover:bg-gray-50">
+                        <td class="p-3 font-bold text-navy-900">${s}</td>
+                        <td class="p-3">Bs. ${efec.toFixed(2)}</td>
+                        <td class="p-3">Bs. ${qr.toFixed(2)}</td>
+                        <td class="p-3 font-semibold text-green-600">Bs. ${tot.toFixed(2)}</td>
+                        <td class="p-3 text-red-600">Bs. ${gas.toFixed(2)}</td>
+                    </tr>
+                `;
+            });
+
+            // Planilla de Comisiones
+            let operariosMap = {};
+            ventasSuc.forEach(v => {
+                if(!operariosMap[v.operador]) operariosMap[v.operador] = { count: 0, total: 0 };
+                operariosMap[v.operador].count += 1;
+                operariosMap[v.operador].total += v.monto;
+            });
+            let tbodyCom = document.getElementById('tabla-comisiones');
+            tbodyCom.innerHTML = '';
+            for(let op in operariosMap) {
+                let data = operariosMap[op];
+                let com = data.total * 0.30;
+                tbodyCom.innerHTML += `
+                    <tr class="hover:bg-gray-50">
+                        <td class="p-3 font-semibold">${op}</td>
+                        <td class="p-3">${data.count}</td>
+                        <td class="p-3">Bs. ${data.total.toFixed(2)}</td>
+                        <td class="p-3 font-bold text-navy-900">Bs. ${com.toFixed(2)}</td>
+                    </tr>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
